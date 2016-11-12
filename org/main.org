@@ -1,0 +1,151 @@
+#+TITLE: Python learning exercises using Lupapiste data
+
+* Setting needed for ob-ipython
+#+BEGIN_SRC ipython :session :exports both :results silent
+  %matplotlib inline
+#+END_SRC
+
+* Read data to dataframe
+#+NAME: read Lupapiste data  
+#+BEGIN_SRC ipython :session :exports both :results silent
+  def read_data(file_name):
+      #logger.info("Reading data from file " + file_name)
+      df = pd.read_csv(file_name, parse_dates=['datetime'], sep = ';')
+      df = df[df["municipalityId"].notnull()]
+      df["municipalityId"] = df["municipalityId"].astype(int)
+      df["userId"] = df["userId"].astype(int)
+      #logger.info("N of rows: {:.0f}".format(len(df)))
+      df = df.sort_values(['applicationId', 'datetime'])
+      return df
+  usage_file_test = "../data/small/some-lupapiste-usage-pub-20161031.csv"
+  usage_file = "../data/all-lupapiste-usage-pub-20161031.csv"
+  operative_file = "../data/all-applications-operative-pub-20161031.csv"
+  df = read_data(usage_file)
+  df_operative = pd.read_csv(operative_file, sep = ';')
+#+End_SRC
+* Answers to exercises
+** Week 1
+*** a) Monessako kunnassa Lupapiste-palvelua on tähän mennessä käytetty? (laske uniikit municpalityId:t käyttödatasta)
+#+NAME: week1-a
+#+BEGIN_SRC ipython :session :exports both :results output
+print('Amount of municipalites that have used the service is {}').format(df.municipalityId.unique().size)
+#+END_SRC
+
+#+RESULTS:
+: Amount of municipalites that have used service is 207
+
+*** b) Montako luvanhakijaa Lupapisteessä on tähän mennessä ollut? (applicant-roolin käyttäjät) Entä viranomaisia? (authority)
+#+NAME: week1-b
+#+BEGIN_SRC ipython :session :exports both :results output
+print("Amount of application role users is {}").format(df[df['role'] == 'applicant'].userId.unique().size)
+print("Amount of authority role users is {}").format(df[df['role'] == 'authority'].userId.unique().size)
+#+END_SRC
+
+#+RESULTS: week1-b
+: Amount of application role users is 30172
+: Amount of authority role users is 1647
+
+*** c) Kuinka moni käyttäjä on kertarakentaja? Toisin sanoen, hakenut vain yhden luvan. ( (tähän tarvitaan myös operatiivinen data)
+#+NAME: week1-c
+#+BEGIN_SRC ipython :session :exports both
+pd.merge(df[df['action'] == 'submit-application'], df_operative[df_operative['state']=='sent'], on='applicationId', how='inner').head()
+#+END_SRC
+
+** Week 2
+*** H1a) Hakija ja viranomainen voivat keskustella lupahakemuksesta lisäämällä kommentteja (add-comment). Kuinka monta kommenttia on kullakin hakemuksella?
+#+NAME: week2-h1a
+#+BEGIN_SRC ipython :session :exports both :results output
+print(df[(df['action'] == 'add-comment')].groupby('applicationId').count().userId)
+#+END_SRC
+
+#+RESULTS: week2-h1a
+#+begin_example
+applicationId
+LP-1000-200011     2
+LP-1000-200086     2
+LP-1000-200188     3
+LP-1000-200193    10
+LP-1000-200263     6
+LP-1000-200271     6
+LP-1000-200317     5
+LP-1000-200414    31
+LP-1000-200436     2
+LP-1000-200452     4
+LP-1000-200459     5
+LP-1000-200505    12
+LP-1000-200522     3
+LP-1000-200546    11
+LP-1000-200557    11
+LP-1000-200569     2
+LP-1000-200570     2
+LP-1000-200582    17
+LP-1000-200584     2
+LP-1000-200598    18
+LP-1000-200630    15
+LP-1000-200655     7
+LP-1000-200669     5
+LP-1000-200695     8
+LP-1000-200709    11
+LP-1000-200742    11
+LP-1000-200962     5
+LP-1000-200975     2
+LP-1000-200977    11
+LP-1000-200988    10
+                  ..
+LP-1177-237750     3
+LP-1177-237952     2
+LP-1177-239316     1
+LP-1177-240067     2
+LP-1177-247461     1
+LP-1178-236402     1
+LP-1181-240117     3
+LP-1181-258245     7
+LP-1181-258343     1
+LP-1181-260200    11
+LP-1183-246362     1
+LP-1183-259142     2
+LP-1184-246409     2
+LP-1187-248542     1
+LP-1187-248543     2
+LP-1189-250529     2
+LP-1190-251318     3
+LP-1191-259064     2
+LP-1192-253259     1
+LP-1193-257057     1
+LP-1193-257072     1
+LP-1196-255826     1
+LP-1198-257915     2
+LP-1199-258140     2
+LP-1199-261490     4
+LP-1200-258208     1
+LP-1200-261368     1
+LP-1202-258422     1
+LP-1204-262026     3
+LP-1206-259939     1
+Name: userId, dtype: int64
+#+end_example
+
+*** A1b) Kausivaihtelu vuositasolla: Mihin aikaan vuodesta hakemuksia luodaan? Ehkä enemmän keväällä? Piirrä kuvaaaja. (Python plot) Vinkki: luo operatiivisen datan createdDaten pohjalta uusi muuttuja createdMonth ja piirrä pylväskaavio siten, että vaaka-akselilla on kuukaudet 1-12 ja pystyakselilla hakemusten lukumäärä.
+#+NAME: week2-a1b
+#+BEGIN_SRC ipython :session :file /Users/toniok/Python/Python-data-science-exercises/org/py803onp.png :exports both
+
+#+END_SRC
+
+* Imports that are needed
+#+BEGIN_SRC ipython :session :tangle ../src/main.py :mkdirp yes :noweb yes :results silent
+
+  import matplotlib.pyplot as plt
+  import numpy as np
+
+  import sys, re, pdb
+  import logging
+  import argparse
+
+  import pandas as pd
+
+  import matplotlib, datetime
+
+  <<read Lupapiste data>>
+  <<week1-a>>
+  <<week1-b>>
+#+END_SRC
