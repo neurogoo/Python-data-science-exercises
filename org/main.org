@@ -21,7 +21,7 @@
   usage_file = "../data/all-lupapiste-usage-pub-20161031.csv"
   operative_file = "../data/all-applications-operative-pub-20161031.csv"
   df = read_data(usage_file)
-  df_operative = pd.read_csv(operative_file, sep = ';')
+  df_operative = pd.read_csv(operative_file, parse_dates=['createdDate', 'submittedDate'], sep = ';')
 #+End_SRC
 * Answers to exercises
 ** Week 1
@@ -55,11 +55,13 @@ pd.merge(df[df['action'] == 'submit-application'], df_operative[df_operative['st
 *** H1a) Hakija ja viranomainen voivat keskustella lupahakemuksesta lisäämällä kommentteja (add-comment). Kuinka monta kommenttia on kullakin hakemuksella?
 #+NAME: week2-h1a
 #+BEGIN_SRC ipython :session :exports both :results output
+print('Amount of comments on each application is:')
 print(df[(df['action'] == 'add-comment')].groupby('applicationId').count().userId)
 #+END_SRC
 
 #+RESULTS: week2-h1a
 #+begin_example
+Amount of comments on each application is
 applicationId
 LP-1000-200011     2
 LP-1000-200086     2
@@ -128,10 +130,16 @@ Name: userId, dtype: int64
 *** A1b) Kausivaihtelu vuositasolla: Mihin aikaan vuodesta hakemuksia luodaan? Ehkä enemmän keväällä? Piirrä kuvaaaja. (Python plot) Vinkki: luo operatiivisen datan createdDaten pohjalta uusi muuttuja createdMonth ja piirrä pylväskaavio siten, että vaaka-akselilla on kuukaudet 1-12 ja pystyakselilla hakemusten lukumäärä.
 #+NAME: week2-a1b
 #+BEGIN_SRC ipython :session :file /Users/toniok/Python/Python-data-science-exercises/org/py803onp.png :exports both
-
+#Create month column from createDate
+df_operative['createdMonth'] = df_operative['createdDate'].map(lambda x: x.month)
+createdMonthPlot = df_operative[df_operative['state'] == 'submitted'].groupby('createdMonth').size().plot(kind='bar', title='Amount of application submitted each month')
+createdMonthPlot.set_xlabel('Month')
 #+END_SRC
 
-* Imports that are needed
+#+RESULTS: week2-a1b
+[[file:/Users/toniok/Python/Python-data-science-exercises/org/py803onp.png]]
+
+* Code tangle block with imports that are needed
 #+BEGIN_SRC ipython :session :tangle ../src/main.py :mkdirp yes :noweb yes :results silent
 
   import matplotlib.pyplot as plt
@@ -148,4 +156,6 @@ Name: userId, dtype: int64
   <<read Lupapiste data>>
   <<week1-a>>
   <<week1-b>>
+  <<week2-h1a>>
+  <<week2-a1b>>
 #+END_SRC
