@@ -1,3 +1,4 @@
+#+BABEL: :comments link :padline yes
 #+TITLE: Python learning exercises using Lupapiste data
 
 * Setting needed for ob-ipython
@@ -8,6 +9,9 @@
 * Read data to dataframe
 #+NAME: read Lupapiste data  
 #+BEGIN_SRC ipython :session :exports both :results silent
+  def testi():
+      return 3
+
   def read_data(file_name):
       #logger.info("Reading data from file " + file_name)
       df = pd.read_csv(file_name, parse_dates=['datetime'], sep = ';')
@@ -17,51 +21,86 @@
       #logger.info("N of rows: {:.0f}".format(len(df)))
       df = df.sort_values(['applicationId', 'datetime'])
       return df
-  usage_file_test = "../data/small/some-lupapiste-usage-pub-20161031.csv"
-  usage_file = "../data/all-lupapiste-usage-pub-20161031.csv"
-  operative_file = "../data/all-applications-operative-pub-20161031.csv"
-  df = read_data(usage_file)
-  df_operative = pd.read_csv(operative_file, parse_dates=['createdDate', 'submittedDate'], sep = ';')
 #+End_SRC
+#+NAME: read main data
+#+BEGIN_SRC ipython :session :exports both :results silent
+usage_file = "/Users/toniok/Python/Python-data-science-exercises/data/all-lupapiste-usage-pub-20161031.csv"
+operative_file = "/Users/toniok/Python/Python-data-science-exercises/data/all-applications-operative-pub-20161031.csv"
+df = read_data(usage_file)
+df_operative = pd.read_csv(operative_file, parse_dates=['createdDate', 'submittedDate'], sep = ';')
+#+END_SRC
+
+#+NAME: read test data
+#+BEGIN_SRC ipython :session :exports both
+usage_file_test = "../data/small/some-lupapiste-usage-pub-20161031.csv"
+usage_file = "../data/all-lupapiste-usage-pub-20161031.csv"
+operative_file = "../data/all-applications-operative-pub-20161031.csv"
+df = read_data(usage_file)
+df_operative = pd.read_csv(operative_file, parse_dates=['createdDate', 'submittedDate'], sep = ';')
+#+END_SRC
 * Answers to exercises
 ** Week 1
 *** a) Monessako kunnassa Lupapiste-palvelua on tähän mennessä käytetty? (laske uniikit municpalityId:t käyttödatasta)
 #+NAME: week1-a
-#+BEGIN_SRC ipython :session :exports both :results output
-print('Amount of municipalites that have used the service is {}').format(df.municipalityId.unique().size)
+#+BEGIN_SRC ipython :session :exports both :results silent
+  def print_week1a_result(df):
+      print('Amount of municipalites that have used the service is {}').format(df.municipalityId.unique().size)
 #+END_SRC
 
-#+RESULTS:
-: Amount of municipalites that have used service is 207
+#+NAME: print-week1-a
+#+BEGIN_SRC ipython :session :exports both :results output
+  print_week1a_result(df)
+#+END_SRC
+
+#+RESULTS: print-week1-a
+: Amount of municipalites that have used the service is 207
 
 *** b) Montako luvanhakijaa Lupapisteessä on tähän mennessä ollut? (applicant-roolin käyttäjät) Entä viranomaisia? (authority)
 #+NAME: week1-b
-#+BEGIN_SRC ipython :session :exports both :results output
-print("Amount of application role users is {}").format(df[df['role'] == 'applicant'].userId.unique().size)
-print("Amount of authority role users is {}").format(df[df['role'] == 'authority'].userId.unique().size)
+#+BEGIN_SRC ipython :session :exports both :results silent
+  def print_week1b_results(df):
+      print("Amount of application role users is {}").format(df[df['role'] == 'applicant'].userId.unique().size)
+      print("Amount of authority role users is {}").format(df[df['role'] == 'authority'].userId.unique().size)
 #+END_SRC
 
-#+RESULTS: week1-b
+#+NAME: print-week1-b
+#+BEGIN_SRC ipython :session :exports both :results output
+  print_week1b_results(df)
+#+END_SRC
+
+#+RESULTS: print-week1-b
 : Amount of application role users is 30172
 : Amount of authority role users is 1647
 
 *** c) Kuinka moni käyttäjä on kertarakentaja? Toisin sanoen, hakenut vain yhden luvan. ( (tähän tarvitaan myös operatiivinen data)
 #+NAME: week1-c
 #+BEGIN_SRC ipython :session :exports both
-pd.merge(df[df['action'] == 'submit-application'], df_operative[df_operative['state']=='sent'], on='applicationId', how='inner').head()
+  def print_week1c_results(df,df_operative):
+      pd.merge(df[df['action'] == 'submit-application'], df_operative[df_operative['state']=='sent'], on='applicationId', how='inner').head()
+#+END_SRC
+
+#+NAME: print-week1-c
+#+BEGIN_SRC ipython :session :exports both
+  print_week1c_results(df,df_operative)
 #+END_SRC
 
 ** Week 2
 *** H1a) Hakija ja viranomainen voivat keskustella lupahakemuksesta lisäämällä kommentteja (add-comment). Kuinka monta kommenttia on kullakin hakemuksella?
 #+NAME: week2-h1a
-#+BEGIN_SRC ipython :session :exports both :results output
-print('Amount of comments on each application is:')
-print(df[(df['action'] == 'add-comment')].groupby('applicationId').count().userId)
+#+BEGIN_SRC ipython :session :exports both :results silent
+  def print_week2h1a_results(df):
+      print('Amount of comments on each application is:')
+      print(df[(df['action'] == 'add-comment')].groupby('applicationId').count().userId)
 #+END_SRC
 
-#+RESULTS: week2-h1a
+#+NAME: print-week2-h1a
+#+BEGIN_SRC ipython :session :exports both :results output
+  print_week2h1a_results(df)
+#+END_SRC
+
+#+RESULTS: print-week2-h1a
 #+begin_example
-Amount of comments on each application is
+Amount of comments on each application is:
 applicationId
 LP-1000-200011     2
 LP-1000-200086     2
@@ -129,17 +168,24 @@ Name: userId, dtype: int64
 
 *** A1b) Kausivaihtelu vuositasolla: Mihin aikaan vuodesta hakemuksia luodaan? Ehkä enemmän keväällä? Piirrä kuvaaaja. (Python plot) Vinkki: luo operatiivisen datan createdDaten pohjalta uusi muuttuja createdMonth ja piirrä pylväskaavio siten, että vaaka-akselilla on kuukaudet 1-12 ja pystyakselilla hakemusten lukumäärä.
 #+NAME: week2-a1b
-#+BEGIN_SRC ipython :session :file /Users/toniok/Python/Python-data-science-exercises/org/py803onp.png :exports both
-#Create month column from createDate
-df_operative['createdMonth'] = df_operative['createdDate'].map(lambda x: x.month)
-createdMonthPlot = df_operative[df_operative['state'] == 'submitted'].groupby('createdMonth').size().plot(kind='bar', title='Amount of application submitted each month')
-createdMonthPlot.set_xlabel('Month')
+#+BEGIN_SRC ipython :session :exports both :results silent
+  #Create month column from createDate
+  def print_week2a1b_results(df_operative):
+      df_operative['createdMonth'] = df_operative['createdDate'].map(lambda x: x.month)
+      createdMonthPlot = df_operative[df_operative['state'] == 'submitted'].groupby('createdMonth').size().plot(kind='bar', title='Amount of application submitted each month')
+      createdMonthPlot.set_xlabel('Month')
 #+END_SRC
 
-#+RESULTS: week2-a1b
+#+NAME: print-week2-a1b
+#+BEGIN_SRC ipython :session :file /Users/toniok/Python/Python-data-science-exercises/org/py803onp.png :exports both
+  print_week2a1b_results(df_operative)
+#+END_SRC
+
+#+RESULTS: print-week2-a1b
 [[file:/Users/toniok/Python/Python-data-science-exercises/org/py803onp.png]]
 
-* Code tangle block with imports that are needed
+* Code tangle blocks
+** Main.py code tangle block with imports that are needed
 #+BEGIN_SRC ipython :session :tangle ../src/main.py :mkdirp yes :noweb yes :results silent
 
   import matplotlib.pyplot as plt
@@ -158,4 +204,29 @@ createdMonthPlot.set_xlabel('Month')
   <<week1-b>>
   <<week2-h1a>>
   <<week2-a1b>>
+
+  if __name__ == "__main__":
+      <<read main data>>
+      <<print-week1-a>>
+      <<print-week1-b>>
+      <<print-week2-h1a>>
+      <<print-week2-a1b>>
+#+END_SRC
+
+** Test code tangle block
+#+BEGIN_SRC ipython :session :tangle ../tests/test_main.py :mkdirp yes :noweb yes :results silent
+    import os
+    import sys
+    PACKAGE_PARENT = '..'
+    SCRIPT_DIR = os.path.dirname(os.path.realpath(os.path.join(os.getcwd(), os.path.expanduser(__file__))))
+    sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
+    from src import main
+    class TestClass:
+        def test_one(self):
+            x = "this"
+            assert 'h' in x
+
+        def test_oikea(self):
+            x = main.testi()
+            assert x == 3
 #+END_SRC
