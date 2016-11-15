@@ -197,6 +197,7 @@ Name: userId, dtype: int64
 
   import pandas as pd
 
+  import Tkinter
   import datetime
 
   <<read Lupapiste data>>
