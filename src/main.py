@@ -1,3 +1,4 @@
+import Tkinter
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -7,7 +8,6 @@ import argparse
 
 import pandas as pd
 
-import Tkinter
 import datetime
 
 def testi():
