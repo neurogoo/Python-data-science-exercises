@@ -188,7 +188,8 @@ Name: userId, dtype: int64
 ** Main.py code tangle block with imports that are needed
 #+BEGIN_SRC ipython :session :tangle ../src/main.py :mkdirp yes :noweb yes :results silent
 
-  import Tkinter
+  import matplotlib as mpl
+  mpl.use('Agg')
   import matplotlib.pyplot as plt
   import numpy as np
 
